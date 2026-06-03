@@ -176,7 +176,6 @@ CREATE TABLE dependiente (
 );
 
 -- ENTIDAD: CLIENTE
-
 CREATE TABLE cliente (
     id_cliente INTEGER NOT NULL,
     rfc VARCHAR(13) NOT NULL,
@@ -230,7 +229,6 @@ CREATE TABLE persona_moral (
 );
 
 -- ENTIDAD: CATEGORIA
-
 CREATE TABLE categoria (
     id_categoria INTEGER,
     nombre VARCHAR(80) NOT NULL,
@@ -245,7 +243,6 @@ CREATE TABLE categoria (
 
 -- ENTIDAD: PRODUCTO
 -- Especialización disjunta total: PLATILLO o BEBIDA
-
 CREATE TABLE producto (  
     id_producto INTEGER,
     id_categoria INTEGER NOT NULL,
