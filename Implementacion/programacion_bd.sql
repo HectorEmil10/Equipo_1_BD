@@ -129,7 +129,7 @@ BEGIN
     END IF;
 
     -- Si no se proporciona fecha de fin, se toma todo el día de la fecha inicial
-    IF p_fecha_fin IS NULL THEN
+    IF fecha_fin_p IS NULL THEN
         p_fecha_fin := p_fecha_inicio + INTERVAL '1 day';
     END IF;
 
@@ -163,6 +163,40 @@ CREATE TRIGGER trg_actualizar_totalOrden
 AFTER INSERT OR UPDATE OR DELETE
 ON detalle_orden
 FOR EACH ROW EXECUTE FUNCTION fn_actualizar_totalOrden();
+
+
+/* ============================================================
+   PROCEDIMIENTO: MONTO DE PAGO
+   Este procedimiento calcula el monto de pago a partir del total de la orden
+   ============================================================ */
+
+CREATE OR REPLACE FUNCTION fn_calcular_monto_pago()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_total_pagar NUMERIC(10,2);
+BEGIN
+    SELECT total_pagar
+    INTO v_total_pagar
+    FROM orden
+    WHERE folio = NEW.folio;
+
+    IF v_total_pagar IS NULL THEN
+        RAISE EXCEPTION 'La orden % no existe.', NEW.folio;
+    END IF;
+
+    NEW.monto_pago := ROUND((v_total_pagar * NEW.porcentaje_pago) / 100, 2);
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_calcular_monto_pago ON pago;
+
+CREATE TRIGGER trg_calcular_monto_pago
+BEFORE INSERT OR UPDATE OF porcentaje_pago
+ON pago
+FOR EACH ROW
+EXECUTE FUNCTION fn_calcular_monto_pago();
 
 
 /* ============================================================
